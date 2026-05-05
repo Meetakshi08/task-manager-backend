@@ -1,54 +1,33 @@
-package com.example.taskManagementBackendMain.service.security;
+package com.example.taskManagementBackendMain.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
-
-    @Autowired
-    private JwtFilter jwtFilter;
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                // Disable CSRF
                 .csrf(csrf -> csrf.disable())
 
-                .cors(cors -> {})
+                // Enable CORS
+                .cors(Customizer.withDefaults())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
+                // Authorize Requests
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/",
                                 "/auth/login",
-                                "/auth/signUp",
-                                "/auth/register"
+                                "/auth/signUp"
                         ).permitAll()
 
                         .anyRequest().authenticated()
-                )
-
-                .addFilterBefore(jwtFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-
-                .formLogin(form -> form.disable())
-
-                .httpBasic(basic -> basic.disable());
+                );
 
         return http.build();
     }
