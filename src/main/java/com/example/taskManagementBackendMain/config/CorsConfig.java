@@ -3,8 +3,8 @@ package com.example.taskManagementBackendMain.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
 
@@ -16,15 +16,13 @@ public class CorsConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Frontend URLs
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "https://task-manager-frontend.onrender.com"
+                        "https://task-manager-frontend-red-rho.vercel.app"
                 )
         );
 
-        // Allowed Methods
         configuration.setAllowedMethods(
                 List.of(
                         "GET",
@@ -36,17 +34,10 @@ public class CorsConfig {
                 )
         );
 
-        // Allowed Headers
         configuration.setAllowedHeaders(
                 List.of("*")
         );
 
-        // Exposed Headers
-        configuration.setExposedHeaders(
-                List.of("Authorization")
-        );
-
-        // Allow Credentials
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
