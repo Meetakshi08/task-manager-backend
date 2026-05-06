@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,19 +27,22 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // Password Encoder
+    // PASSWORD ENCODER
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS CONFIG
+    // CORS CONFIGURATION
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "https://your-frontend-url.onrender.com"
+        ));
 
         configuration.setAllowedMethods(List.of(
                 "GET",
@@ -61,7 +65,7 @@ public class SecurityConfig {
         return source;
     }
 
-    // SECURITY CONFIG
+    // SECURITY FILTER CHAIN
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
@@ -82,11 +86,11 @@ public class SecurityConfig {
 
                         // Allow OPTIONS requests
                         .requestMatchers(
-                                org.springframework.http.HttpMethod.OPTIONS,
+                                HttpMethod.OPTIONS,
                                 "/**"
                         ).permitAll()
 
-                        // Public Routes
+                        // Public routes
                         .requestMatchers(
                                 "/",
                                 "/auth/login",
@@ -94,7 +98,7 @@ public class SecurityConfig {
                                 "/auth/register"
                         ).permitAll()
 
-                        // All other routes protected
+                        // Protected routes
                         .anyRequest().authenticated()
                 )
 
