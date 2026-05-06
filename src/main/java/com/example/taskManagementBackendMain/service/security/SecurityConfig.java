@@ -1,44 +1,110 @@
-package com.example.taskManagementBackendMain.config;
+package com.example.taskManagementBackendMain.service.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
-    // BCrypt Password Encoder Bean
+    @Autowired
+    private JwtFilter jwtFilter;
+
+    // Password Encoder
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Spring Security Configuration
+    // CORS CONFIG
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    // SECURITY CONFIG
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
 
         http
-                // Disable CSRF
+
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
                 .cors(Customizer.withDefaults())
 
-                // Public Routes
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Allow OPTIONS requests
                         .requestMatchers(
-                                "/auth/login",
-                                "/auth/signUp"
+                                org.springframework.http.HttpMethod.OPTIONS,
+                                "/**"
                         ).permitAll()
 
-                        // Secure all other routes
+                        // Public Routes
+                        .requestMatchers(
+                                "/",
+                                "/auth/login",
+                                "/auth/signUp",
+                                "/auth/register"
+                        ).permitAll()
+
+                        // All other routes protected
                         .anyRequest().authenticated()
-                );
+                )
+
+                .addFilterBefore(
+                        jwtFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
+                .formLogin(form -> form.disable())
+
+                .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
