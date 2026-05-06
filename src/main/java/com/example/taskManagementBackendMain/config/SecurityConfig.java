@@ -1,5 +1,6 @@
-package com.example.taskManagementBackendMain.service.security;
+package com.example.taskManagementBackendMain.config;
 
+import com.example.taskManagementBackendMain.service.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
