@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -33,7 +32,18 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        System.out.println("JWT FILTER RUNNING");
+
         String authHeader = request.getHeader("Authorization");
+
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Authorization Header: " + authHeader);
+
+        // Skip auth routes
+        if (request.getRequestURI().startsWith("/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = null;
         String email = null;
