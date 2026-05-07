@@ -27,37 +27,23 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // PASSWORD ENCODER
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS CONFIGURATION
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:5173",
-                "https://*.vercel.app"
-        ));
+        configuration.setAllowedOriginPatterns(List.of("*"));
 
-        configuration.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"
-        ));
+        configuration.setAllowedMethods(List.of("*"));
 
         configuration.setAllowedHeaders(List.of("*"));
 
-        configuration.setExposedHeaders(List.of("Authorization"));
-
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
@@ -66,13 +52,12 @@ public class SecurityConfig {
 
         return source;
     }
-    // SECURITY FILTER CHAIN
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
 
         http
-
                 .csrf(csrf -> csrf.disable())
 
                 .cors(Customizer.withDefaults())
@@ -85,21 +70,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Allow OPTIONS requests
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        ).permitAll()
+                        // Allow auth routes
+                        .requestMatchers("/auth/**").permitAll()
 
-                        // Public routes
-                        .requestMatchers(
-                                "/",
-                                "/auth/login",
-                                "/auth/signUp",
-                                "/auth/register"
-                        ).permitAll()
+                        // Allow OPTIONS request
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Protected routes
+                        // Everything else needs JWT
                         .anyRequest().authenticated()
                 )
 
@@ -108,9 +85,9 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
 
-                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
 
-                .httpBasic(basic -> basic.disable());
+                .formLogin(form -> form.disable());
 
         return http.build();
     }
