@@ -42,7 +42,6 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "https://*.vercel.app"
-
         ));
 
         configuration.setAllowedMethods(List.of(
@@ -56,6 +55,8 @@ public class SecurityConfig {
 
         configuration.setAllowedHeaders(List.of("*"));
 
+        configuration.setExposedHeaders(List.of("Authorization"));
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
@@ -65,7 +66,6 @@ public class SecurityConfig {
 
         return source;
     }
-
     // SECURITY FILTER CHAIN
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
