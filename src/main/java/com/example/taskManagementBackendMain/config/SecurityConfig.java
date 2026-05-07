@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
-                "https://task-manager-frontend-7ru083i7l-meetakshijaiswal-6575s-projects.vercel.app"
+                "https://*.vercel.app"
 
         ));
 
